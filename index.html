@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZININO Store</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+
+<body dir="rtl" class="t1">
+    <header class="s1 fixed-top">
+        <div class="logo">
+            <img src="images/s1logo.webp" alt="the img logo">
+            <h1>ZININO</h1>
+        </div>
+        <div class="marquee row">
+            <p> دفع عند الإستلام </p>
+        </div>
+        <div class="social">
+            <div class="cart-container">
+                <div id="add-to-cart"></div>
+                <div class="cart-icon">
+                    <a href="checkout.html" class="ba1 button mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="30px" viewBox="0 -960 960 960" width="30px"
+                            fill="#000000">
+                            <path
+                                d="M280-80q-33 0-56.5-23.5T200-160q0-33 23.5-56.5T280-240q33 0 56.5 23.5T360-160q0 33-23.5 56.5T280-80Zm400 0q-33 0-56.5-23.5T600-160q0-33 23.5-56.5T680-240q33 0 56.5 23.5T760-160q0 33-23.5 56.5T680-80ZM246-720l96 200h280l110-200H246Zm-38-80h590q23 0 35 20.5t1 41.5L692-482q-11 20-29.5 31T622-440H324l-44 80h480v80H280q-45 0-68-39.5t-2-78.5l54-98-144-304H40v-80h130l38 80Zm134 280h280-280Z" />
+                        </svg>
+                    </a>
+                    <span id="cart-count">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- نافذة منبثقة لتفاصيل المنتج -->
+    <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">تفاصيل المنتج</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img id="modalProductImage" src="" class="img-fluid" alt="Product Image">
+                <h5 id="modalProductName"></h5>
+                <p id="modalProductPrice"></p>
+                <p id="modalProductDescription"></p>
+                <p id="modalProductInfo"></p>
+                <div id="additionalImagesContainer" class="mb-3"></div> <!-- حاوية الصور والفيديوهات -->
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Product Grid -->
+    <div class="product">
+        <div class="row">
+            <script>
+                (function () {
+                    const products = JSON.parse(localStorage.getItem('products')) || [];
+
+                    products.forEach(product => {
+                        document.write(`
+                            <div class="product-card col-md-3">
+                                <img src="${product.images[0]}" alt="${product.name}" class="img-fluid">
+                                <h5>${product.name}</h5>
+                                <p>السعر: ${product.price} DH</p>
+                                <p>الوصف: ${product.description}</p>
+                                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                                <button class="btn btn-primary alert-success" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ['${product.images.join("','")}'])">معاينة المنتوج</button>
+                            </div>
+                        `);
+                    });
+                })();
+
+                function showProductDetails(name, price, description, info, images) {
+                    document.getElementById('modalProductName').innerText = name;
+                    document.getElementById('modalProductPrice').innerText = 'السعر: ' + price + ' DH';
+                    document.getElementById('modalProductDescription').innerText = description;
+                    document.getElementById('modalProductInfo').innerText = 'معلومات إضافية: ' + info; 
+
+                    const modalProductImage = document.getElementById('modalProductImage');
+                    modalProductImage.src = images[0]; // عرض الصورة الأساسية
+
+                    const additionalImagesContainer = document.getElementById('additionalImagesContainer');
+                    additionalImagesContainer.innerHTML = ''; // تنظيف المحتوى السابق
+
+                    // إضافة الصور الإضافية
+                    images.slice(1).forEach(img => { // بدءًا من الصورة الثانية
+                        const imgElement = document.createElement('img');
+                        imgElement.src = img;
+                        imgElement.className = 'img-fluid mb-2'; // إضافة مساحة أسفل الصورة
+                        additionalImagesContainer.appendChild(imgElement);
+                    });
+
+                    $('#productModal').modal('show');
+                }
+            </script>
+
+            <!-- عرض المنتجات الثابتة -->
+            <div class="product-card col-md-3">
+                <a href="pag/pag1.html"><img src="images/f3.webp" alt="Product 1"></a>
+                <h5>Kemei KM-6637 <br> آلة إزالة الشعر متعددة الوظائف ، 4 في 1 قابلة لإعادة الشحن</h5>
+                <p>السعر: 120 DH</p>
+                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                <a href="pag/pag1.html">
+                    <button class="btn btn-primary alert-success">معاينة المنتوج</button>
+                </a>
+            </div>
+
+            <div class="product-card col-md-3">
+                <a href="pag/pag2.html"><img src="images/a2.webp" alt="Product 2"></a>
+                <h5>مقص الشعر الكهربائي Kemei KM-2278</h5>
+                <p>السعر: 120 DH</p>
+                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                <a href="pag/pag2.html">
+                    <button class="btn btn-primary alert-success">معاينة المنتوج</button>
+                </a>
+            </div>
+
+            <div class="product-card col-md-3">
+                <a href="pag/pag3.html"><img src="images/z1.webp" alt="Product 3"></a>
+                <h5>Kemei ماكينة قص الشعر القابلة لإعادة الشحن</h5>
+                <p>السعر: 120 DH</p>
+                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                <a href="pag/pag3.html">
+                    <button class="btn btn-primary alert-success">معاينة المنتوج</button>
+                </a>
+            </div>
+
+            <div class="product-card col-md-3">
+                <a href="pag/pag4.html"><img src="images/R4.jpeg" alt="Product 4"></a>
+                <h5>جهاز تشذيب الشعر الكهربائي اللاسلكي T9 للرجال</h5>
+                <p>السعر: 120 DH</p>
+                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                <a href="pag/pag4.html">
+                    <button class="btn btn-primary alert-success">معاينة المنتوج</button>
+                </a>
+            </div>
+
+            <div class="product-card col-md-3">
+                <a href="pag/pag5.html"><img src="images/T2.jpg" alt="Product 5"></a>
+                <h5>ماكينة الحلاقة Kemei KM-802</h5>
+                <p>السعر: 250 DH</p>
+                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                <a href="pag/pag5.html">
+                    <button class="btn btn-primary alert-success">معاينة المنتوج</button>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <h4>سلة التسوق</h4>
+        <div id="cart-items"></div>
+        <div class="cart-footer">
+            <h5>المجموع: <span id="cart-total">0 DH</span></h5>
+            <button class="btn btn-success" onclick="confirmOrder()">تأكيد الطلب</button>
+        </div>
+    </div>
+
+    <script src="js/scrip.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

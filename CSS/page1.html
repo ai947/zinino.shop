@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منتجات</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .product-details {
+            display: none;
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+        }
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<h2>منتجاتنا</h2>
+<img src="" alt="منتج" style="width:200px; cursor:pointer;" id="productImage">
+
+<div id="productDetails" class="product-details">
+    <h2>اسم المنتج</h2>
+    <p>وصف المنتج هنا...</p>
+    <p>تقييم: ★★★★☆</p>
+</div>
+
+<script>
+    var img = document.getElementById("productImage");
+    var details = document.getElementById("productDetails");
+
+    img.onclick = function() {
+        details.classList.toggle("show");
+    }
+</script>
+
+</body>
+</html>
