@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="ar">
 
 <head>
@@ -29,23 +29,24 @@
                 <textarea class="form-control" id="productInfo"></textarea>
             </div>
             <div class="form-group">
-                <label for="productImage">رفع صورة المنتج الأساسية</label>
-                <input type="file" class="form-control" id="productImage" accept="image/*" required>
+                <label for="productImage">رفع صورة المنتج الأساسية (اختياري)</label>
+                <input type="file" class="form-control" id="productImage" accept="image/*">
             </div>
             <div class="form-group">
-                <label for="additionalImages">رفع صور إضافية (يمكنك اختيار أكثر من صورة)</label>
-                <input type="file" class="form-control" id="additionalImages" accept="image/*" multiple required>
+                <label for="additionalImages">رفع صور إضافية (اختياري، يمكنك اختيار أكثر من صورة)</label>
+                <input type="file" class="form-control" id="additionalImages" accept="image/*" multiple>
             </div>
             <div class="form-group">
-                <label for="productVideos">رفع فيديوهات المنتج (يمكنك اختيار أكثر من فيديو)</label>
+                <label for="productVideos">رفع فيديوهات المنتج (اختياري، يمكنك اختيار أكثر من فيديو)</label>
                 <input type="file" class="form-control" id="productVideos" accept="video/*" multiple>
             </div>
 
             <button type="submit" class="btn btn-primary">رفع المنتج</button>
         </form>
+
+        <div id="productList" class="mt-4"></div>
     </div>
 
-    <!-- نافذة منبثقة لتفاصيل المنتج -->
     <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -60,224 +61,205 @@
                     <h5 id="modalProductName"></h5>
                     <p id="modalProductPrice"></p>
                     <p id="modalProductDescription"></p>
-                    <p id="modalProductInfo"></p> <!-- معلومات إضافية -->
-                    <div id="additionalImagesContainer" class="mb-3"></div> <!-- حاوية الصور الإضافية -->
-                    <div id="additionalVideosContainer" class="mb-3"></div> <!-- حاوية الفيديوهات الإضافية -->
+                    <p id="modalProductInfo"></p>
+                    <div id="additionalImagesContainer" class="mb-3"></div>
+                    <div id="additionalVideosContainer" class="mb-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        let currentEditingIndex = -1; // متغير لتتبع المنتج الجاري تعديله
+
         document.getElementById('productForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const productName = document.getElementById('productName').value;
             const productPrice = document.getElementById('productPrice').value;
             const productDescription = document.getElementById('productDescription').value;
-            const productInfo = document.getElementById('productInfo').value; // معلومات إضافية
+            const productInfo = document.getElementById('productInfo').value;
             const productImageFile = document.getElementById('productImage').files[0];
             const additionalImagesFiles = document.getElementById('additionalImages').files;
-            const productVideosFiles = document.getElementById('productVideos').files; // الفيديوهات
+            const productVideosFiles = document.getElementById('productVideos').files;
 
-            let products = JSON.parse(localStorage.getItem('products')) || [];
             const images = [];
             const videos = [];
 
-            // تحقق مما إذا كان المنتج موجودًا بالفعل
-            const isDuplicate = products.some(product => product.name === productName);
-            if (isDuplicate) {
-                alert('هذا المنتج موجود بالفعل!');
-                return; // الخروج إذا كان المنتج مكررًا
-            }
-
-            // قراءة الصورة الأساسية
             if (productImageFile) {
                 const reader = new FileReader();
                 reader.onload = function (event) {
-                    const mainImage = event.target.result;
-                    images.push(mainImage); // إضافة الصورة الأساسية إلى المصفوفة
-
-                    // قراءة كل صورة إضافية وإضافتها إلى مصفوفة الصور
-                    const additionalImages = [];
-                    let filesProcessed = 0; // عدد الملفات المعالجة
-
-                    for (let i = 0; i < additionalImagesFiles.length; i++) {
-                        const additionalImageFile = additionalImagesFiles[i];
-                        const additionalImageReader = new FileReader();
-
-                        additionalImageReader.onload = function (event) {
-                            additionalImages.push(event.target.result);
-                            filesProcessed++; // زيادة عدد الملفات المعالجة
-
-                            // إذا كانت جميع الصور الإضافية قد تم تحميلها
-                            if (filesProcessed === additionalImagesFiles.length) {
-                                // قراءة كل فيديو وإضافته إلى مصفوفة الفيديوهات
-                                let videoFilesProcessed = 0; // عدد ملفات الفيديو المعالجة
-                                for (let j = 0; j < productVideosFiles.length; j++) {
-                                    const videoFile = productVideosFiles[j];
-                                    const videoReader = new FileReader();
-                                    videoReader.onload = function (event) {
-                                        videos.push(event.target.result); // إضافة الفيديو إلى المصفوفة
-                                        videoFilesProcessed++; // زيادة عدد ملفات الفيديو المعالجة
-
-                                        // إذا كانت جميع الفيديوهات قد تم تحميلها
-                                        if (videoFilesProcessed === productVideosFiles.length) {
-                                            // تخزين الصور والفيديوهات مع البيانات
-                                            products.push({
-                                                name: productName,
-                                                price: productPrice,
-                                                description: productDescription,
-                                                info: productInfo, // تخزين المعلومات الإضافية
-                                                images: [mainImage, ...additionalImages], // تخزين الصورة الأساسية مع الصور الإضافية
-                                                videos: videos // تخزين الفيديوهات
-                                            });
-                                            localStorage.setItem('products', JSON.stringify(products));
-                                            alert('تم رفع المنتج بنجاح!');
-                                            document.getElementById('productForm').reset();
-                                        }
-                                    };
-                                    videoReader.readAsDataURL(videoFile); // قراءة الفيديو
-                                }
-
-                                // إذا لم يكن هناك فيديوهات
-                                if (productVideosFiles.length === 0) {
-                                    products.push({
-                                        name: productName,
-                                        price: productPrice,
-                                        description: productDescription,
-                                        info: productInfo, // تخزين المعلومات الإضافية
-                                        images: [mainImage, ...additionalImages], // تخزين الصورة الأساسية مع الصور الإضافية
-                                        videos: [] // لا توجد فيديوهات
-                                    });
-                                    localStorage.setItem('products', JSON.stringify(products));
-                                    alert('تم رفع المنتج بنجاح!');
-                                    document.getElementById('productForm').reset();
-                                }
-                            }
-                        };
-                        additionalImageReader.readAsDataURL(additionalImageFile); // قراءة الصورة الإضافية
-                    }
-
-                    // إضافة الصور الإضافية إذا لم يكن هناك صور إضافية
-                    if (additionalImagesFiles.length === 0) {
-                        // قراءة كل فيديو وإضافته إلى مصفوفة الفيديوهات
-                        let videoFilesProcessed = 0; // عدد ملفات الفيديو المعالجة
-                        for (let j = 0; j < productVideosFiles.length; j++) {
-                            const videoFile = productVideosFiles[j];
-                            const videoReader = new FileReader();
-                            videoReader.onload = function (event) {
-                                videos.push(event.target.result); // إضافة الفيديو إلى المصفوفة
-                                videoFilesProcessed++; // زيادة عدد ملفات الفيديو المعالجة
-
-                                // إذا كانت جميع الفيديوهات قد تم تحميلها
-                                if (videoFilesProcessed === productVideosFiles.length) {
-                                    products.push({
-                                        name: productName,
-                                        price: productPrice,
-                                        description: productDescription,
-                                        info: productInfo, // تخزين المعلومات الإضافية
-                                        images: [mainImage], // فقط الصورة الأساسية
-                                        videos: videos // تخزين الفيديوهات
-                                    });
-                                    localStorage.setItem('products', JSON.stringify(products));
-                                    alert('تم رفع المنتج بنجاح!');
-                                    document.getElementById('productForm').reset();
-                                }
-                            };
-                            videoReader.readAsDataURL(videoFile); // قراءة الفيديو
-                        }
-
-                        // إذا لم يكن هناك فيديوهات
-                        if (productVideosFiles.length === 0) {
-                            products.push({
-                                name: productName,
-                                price: productPrice,
-                                description: productDescription,
-                                info: productInfo, // تخزين المعلومات الإضافية
-                                images: [mainImage], // فقط الصورة الأساسية
-                                videos: [] // لا توجد فيديوهات
-                            });
-                            localStorage.setItem('products', JSON.stringify(products));
-                            alert('تم رفع المنتج بنجاح!');
-                            document.getElementById('productForm').reset();
-                        }
-                    }
+                    images.push(event.target.result);
+                    readAdditionalImages(additionalImagesFiles, images, productName, productPrice, productDescription, productInfo, videos);
                 };
-                reader.readAsDataURL(productImageFile); // قراءة الصورة الأساسية
+                reader.readAsDataURL(productImageFile);
+            } else {
+                readAdditionalImages(additionalImagesFiles, images, productName, productPrice, productDescription, productInfo, videos);
             }
         });
 
-        function showProductDetails(name, price, description, info, images, videos) {
+        function readAdditionalImages(additionalImagesFiles, images, productName, productPrice, productDescription, productInfo, videos) {
+            const additionalImages = [];
+            let filesProcessed = 0;
+
+            for (let i = 0; i < additionalImagesFiles.length; i++) {
+                const additionalImageFile = additionalImagesFiles[i];
+                const additionalImageReader = new FileReader();
+
+                additionalImageReader.onload = function (event) {
+                    additionalImages.push(event.target.result);
+                    filesProcessed++;
+
+                    if (filesProcessed === additionalImagesFiles.length) {
+                        readProductVideos(videos, productName, productPrice, productDescription, productInfo, images.concat(additionalImages));
+                    }
+                };
+                additionalImageReader.readAsDataURL(additionalImageFile);
+            }
+
+            if (additionalImagesFiles.length === 0) {
+                readProductVideos(videos, productName, productPrice, productDescription, productInfo, images);
+            }
+        }
+
+        function readProductVideos(videos, productName, productPrice, productDescription, productInfo, allImages) {
+            const productVideosFiles = document.getElementById('productVideos').files;
+            let videoFilesProcessed = 0;
+
+            for (let j = 0; j < productVideosFiles.length; j++) {
+                const videoFile = productVideosFiles[j];
+                const videoReader = new FileReader();
+                videoReader.onload = function (event) {
+                    videos.push(event.target.result);
+                    videoFilesProcessed++;
+
+                    if (videoFilesProcessed === productVideosFiles.length) {
+                        saveProduct(allImages, videos, productName, productPrice, productDescription, productInfo);
+                    }
+                };
+                videoReader.readAsDataURL(videoFile);
+            }
+
+            if (productVideosFiles.length === 0) {
+                saveProduct(allImages, videos, productName, productPrice, productDescription, productInfo);
+            }
+        }
+
+        function saveProduct(images, videos, productName, productPrice, productDescription, productInfo) {
+            if (currentEditingIndex >= 0) {
+                // تعديل المنتج الحالي
+                products[currentEditingIndex] = {
+                    name: productName,
+                    price: productPrice,
+                    description: productDescription,
+                    info: productInfo,
+                    images: images,
+                    videos: videos
+                };
+                currentEditingIndex = -1; // إعادة تعيين المؤشر بعد التعديل
+                alert('تم تعديل المنتج بنجاح!');
+            } else {
+                // إضافة منتج جديد
+                products.push({
+                    name: productName,
+                    price: productPrice,
+                    description: productDescription,
+                    info: productInfo,
+                    images: images,
+                    videos: videos
+                });
+                alert('تم رفع المنتج بنجاح!');
+            }
+
+            localStorage.setItem('products', JSON.stringify(products));
+            document.getElementById('productForm').reset();
+            displayProducts();
+        }
+
+        function showProductDetails(name, price, description, info, images, videos, index) {
             document.getElementById('modalProductName').innerText = name;
             document.getElementById('modalProductPrice').innerText = 'السعر: ' + price + ' DH';
             document.getElementById('modalProductDescription').innerText = description;
-            document.getElementById('modalProductInfo').innerText = 'معلومات إضافية: ' + info; // عرض المعلومات الإضافية
+            document.getElementById('modalProductInfo').innerText = 'معلومات إضافية: ' + info;
 
             const modalProductImage = document.getElementById('modalProductImage');
-            modalProductImage.src = images[0]; // عرض الصورة الأساسية
+            modalProductImage.src = images[0];
 
             const additionalImagesContainer = document.getElementById('additionalImagesContainer');
-            additionalImagesContainer.innerHTML = ''; // تنظيف المحتوى السابق
+            additionalImagesContainer.innerHTML = '';
 
-            // إضافة الصور الإضافية
-            images.slice(1).forEach(img => { // بدءًا من الصورة الثانية
+            images.slice(1).forEach(img => {
                 const imgElement = document.createElement('img');
                 imgElement.src = img;
-                imgElement.className = 'img-fluid mb-2'; // إضافة مساحة أسفل الصورة
+                imgElement.className = 'img-fluid mb-2';
                 additionalImagesContainer.appendChild(imgElement);
             });
 
             const additionalVideosContainer = document.getElementById('additionalVideosContainer');
-            additionalVideosContainer.innerHTML = ''; // تنظيف المحتوى السابق
+            additionalVideosContainer.innerHTML = '';
 
-            // إضافة الفيديوهات
             videos.forEach(video => {
                 const videoElement = document.createElement('video');
                 videoElement.src = video;
-                videoElement.controls = true; // إضافة عناصر التحكم
-                videoElement.className = 'w-100 mb-2'; // عرض الفيديو بشكل مناسب
+                videoElement.controls = true;
+                videoElement.className = 'w-100 mb-2';
                 additionalVideosContainer.appendChild(videoElement);
             });
 
             $('#productModal').modal('show');
         }
 
-        // أضف هذه الدالة في نهاية ملف JavaScript
         function displayProducts() {
-            const products = JSON.parse(localStorage.getItem('products')) || [];
             const productList = document.getElementById('productList');
-
-            // تنظيف القائمة السابقة
             productList.innerHTML = '';
 
             products.forEach((product, index) => {
-                const productItem = document.createElement('div');
-                productItem.className = 'product-item';
-                productItem.innerHTML = `
-                    <h5>${product.name}</h5>
-                    <p>${product.price} DH</p>
-                    <button class="btn btn-info" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ${JSON.stringify(product.images)}, ${JSON.stringify(product.videos)})">عرض التفاصيل</button>
+                const productCard = document.createElement('div');
+                productCard.className = 'card mb-3';
+                productCard.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${product.name}</h5>
+                        <p class="card-text">السعر: ${product.price} DH</p>
+                        <button class="btn btn-info" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ${JSON.stringify(product.images)}, ${JSON.stringify(product.videos)}, ${index})">عرض التفاصيل</button>
+                        <button class="btn btn-warning" onclick="editProduct(${index})">تعديل</button>
+                        <button class="btn btn-danger" onclick="deleteProduct(${index})">حذف</button>
+                    </div>
                 `;
-                productList.appendChild(productItem);
+                productList.appendChild(productCard);
             });
         }
 
-        // استدعاء دالة عرض المنتجات بعد رفع المنتج
-        document.getElementById('productForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            // ...الكود السابق هنا...
+        function editProduct(index) {
+            const product = products[index];
 
-            // بعد رفع المنتج بنجاح، عرض المنتجات
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productInfo').value = product.info;
+
+            // عرض الصور والفيديوهات في النموذج (يمكن تحسين هذه الوظيفة)
+            currentEditingIndex = index; // تعيين المؤشر الحالي للتعديل
+            $('#productModal').modal('hide'); // إغلاق النموذج المفتوح
+        }
+
+        function deleteProduct(index) {
+            if (confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) {
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                displayProducts();
+                alert('تم حذف المنتج بنجاح!');
+            }
+        }
+
+        window.onload = function () {
             displayProducts();
-        });
-
+        };
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 </body>
 
 </html>
