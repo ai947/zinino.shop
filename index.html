@@ -69,16 +69,17 @@
                     const products = JSON.parse(localStorage.getItem('products')) || [];
 
                     products.forEach(product => {
-                        document.write(`
-                            <div class="product-card col-md-3">
-                                <img src="${product.images[0]}" alt="${product.name}" class="img-fluid">
-                                <h5>${product.name}</h5>
-                                <p>السعر: ${product.price} DH</p>
-                                <p>الوصف: ${product.description}</p>
-                                <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
-                                <button class="btn btn-primary alert-success" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ['${product.images.join("','")}'])">معاينة المنتوج</button>
-                            </div>
-                        `);
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card col-md-3';
+                        productCard.innerHTML = `
+                            <img src="${product.images[0]}" alt="${product.name}" class="img-fluid">
+                            <h5>${product.name}</h5>
+                            <p>السعر: ${product.price} DH</p>
+                            <p>الوصف: ${product.description}</p>
+                            <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                            <button class="btn btn-primary alert-success" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ${JSON.stringify(product.images)})">معاينة المنتوج</button>
+                        `;
+                        document.querySelector('.row').appendChild(productCard);
                     });
                 })();
 
