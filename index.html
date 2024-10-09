@@ -64,48 +64,48 @@
     <!-- Product Grid -->
     <div class="product">
         <div class="row">
-            <script>
-                (function () {
-                    const products = JSON.parse(localStorage.getItem('products')) || [];
+<script>
+    (function () {
+        const products = JSON.parse(localStorage.getItem('products')) || [];
 
-                    products.forEach(product => {
-                        const productCard = document.createElement('div');
-                        productCard.className = 'product-card col-md-3';
-                        productCard.innerHTML = `
-                            <img src="${product.images[0]}" alt="${product.name}" class="img-fluid">
-                            <h5>${product.name}</h5>
-                            <p>السعر: ${product.price} DH</p>
-                            <p>الوصف: ${product.description}</p>
-                            <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
-                            <button class="btn btn-primary alert-success" onclick="showProductDetails('${product.name}', '${product.price}', '${product.description}', '${product.info}', ${JSON.stringify(product.images)})">معاينة المنتوج</button>
-                        `;
-                        document.querySelector('.row').appendChild(productCard);
-                    });
-                })();
+        products.forEach(product => {
+            document.write(`
+                <div class="product-card col-md-3">
+                    <img src="${product.images[0]}" alt="${product.name}" class="img-fluid">
+                    <h5>${product.name}</h5>
+                    <p>السعر: ${product.price} DH</p>
+                    <p>الوصف: ${product.description}</p>
+                    <button class="btn btn-primary add-to-cart">إضافة إلى السلة</button>
+                    <button class="btn btn-primary alert-success" onclick="showProductDetails('${product.name.replace(/'/g, "\\'")}', '${product.price}', '${product.description.replace(/'/g, "\\'")}', '${product.info.replace(/'/g, "\\'")}', ${JSON.stringify(product.images)})">معاينة المنتوج</button>
+                </div>
+            `);
+        });
+    })();
 
-                function showProductDetails(name, price, description, info, images) {
-                    document.getElementById('modalProductName').innerText = name;
-                    document.getElementById('modalProductPrice').innerText = 'السعر: ' + price + ' DH';
-                    document.getElementById('modalProductDescription').innerText = description;
-                    document.getElementById('modalProductInfo').innerText = 'معلومات إضافية: ' + info; 
+    function showProductDetails(name, price, description, info, images) {
+        document.getElementById('modalProductName').innerText = name;
+        document.getElementById('modalProductPrice').innerText = 'السعر: ' + price + ' DH';
+        document.getElementById('modalProductDescription').innerText = description;
+        document.getElementById('modalProductInfo').innerText = 'معلومات إضافية: ' + info; 
 
-                    const modalProductImage = document.getElementById('modalProductImage');
-                    modalProductImage.src = images[0]; // عرض الصورة الأساسية
+        const modalProductImage = document.getElementById('modalProductImage');
+        modalProductImage.src = images[0]; // عرض الصورة الأساسية
 
-                    const additionalImagesContainer = document.getElementById('additionalImagesContainer');
-                    additionalImagesContainer.innerHTML = ''; // تنظيف المحتوى السابق
+        const additionalImagesContainer = document.getElementById('additionalImagesContainer');
+        additionalImagesContainer.innerHTML = ''; // تنظيف المحتوى السابق
 
-                    // إضافة الصور الإضافية
-                    images.slice(1).forEach(img => { // بدءًا من الصورة الثانية
-                        const imgElement = document.createElement('img');
-                        imgElement.src = img;
-                        imgElement.className = 'img-fluid mb-2'; // إضافة مساحة أسفل الصورة
-                        additionalImagesContainer.appendChild(imgElement);
-                    });
+        // إضافة الصور الإضافية
+        images.slice(1).forEach(img => { // بدءًا من الصورة الثانية
+            const imgElement = document.createElement('img');
+            imgElement.src = img;
+            imgElement.className = 'img-fluid mb-2'; // إضافة مساحة أسفل الصورة
+            additionalImagesContainer.appendChild(imgElement);
+        });
 
-                    $('#productModal').modal('show');
-                }
-            </script>
+        $('#productModal').modal('show');
+    }
+</script>
+
 
             <!-- عرض المنتجات الثابتة -->
             <div class="product-card col-md-3">
